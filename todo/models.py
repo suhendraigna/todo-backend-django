@@ -17,43 +17,43 @@ class PrioritasTodo(models.TextChoices):
 
 class Todo(models.Model):
     id = models.UUIDField(
-            primary_key=True,
-            default=uuid.uuid4,
-            editable=False
-            )
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     judul = models.CharField(
-            max_length=200
-            )
+        max_length=200
+    )
     deskripsi=models.TextField(
-            blank=True
-            )
+        blank=True
+    )
     status=models.CharField(
-            max_length=20,
-            choices=StatusTodo.choices,
-            default=StatusTodo.TODO,
-            )
+        max_length=20,
+        choices=StatusTodo.choices,
+        default=StatusTodo.TODO,
+    )
     prioritas=models.CharField(
-            max_length=20,
-            choices=PrioritasTodo.choices,
-            default=PrioritasTodo.SEDANG
-            )
+        max_length=20,
+        choices=PrioritasTodo.choices,
+        default=PrioritasTodo.SEDANG
+    )
     tanggal_jatuh_tempo=models.DateField(
-            null=True,
-            blank=True
-            )
+        null=True,
+        blank=True
+    )
     dibuat_pada=models.DateTimeField(
-            auto_now_add=True
-            )
+        auto_now_add=True
+    )
     diubah_pada=models.DateTimeField(
-            auto_now=True
-            )
+        auto_now=True
+    )
 
     labels = models.ManyToManyField(
-            "label.Label",
-            related_name="todos",
-            blank=True
-            )
+        "label.Label",
+        related_name="todos",
+        blank=True
+    )
 
 
 def __str__(self):
-        return self.judul
+    return self.judul
