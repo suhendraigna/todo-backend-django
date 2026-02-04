@@ -79,3 +79,19 @@ class TodoUbahStatusAPIView(APIView):
 
         response_serializer = TodoResponseSerializer(todo)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+
+class TodoHapusAPIView(APIView):
+    def delete(self, request, todo_id):
+        try:
+            todo = Todo.objects.get(id=todo_id)
+        except Todo.DoesNotExist:
+            return Response(
+                {"error": {"pesan": "Todo tidak ditemukan"}},
+                status=status.HTTP_404_NOT_FOUND,
+                )
+
+        service = TodoService()
+        hasil = service.hapus_todo(todo=todo)
+
+        return Response(hasil, status=status.HTTP_200_OK)

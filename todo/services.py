@@ -58,3 +58,12 @@ class TodoService:
             queryset = queryset.filter(status=status)
 
         return queryset
+
+    def hapus_todo(self, *, todo: Todo):
+        if todo.status != StatusTodo.DIARSIPKAN:
+            todo.status = StatusTodo.DIARSIPKAN
+            todo.save(update_fields=["status", "diubah_pada"])
+            return {"diarsipkan": True}
+
+        todo.delete()
+        return {"dihapus": True}

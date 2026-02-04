@@ -65,6 +65,24 @@ class TodoServiceTest(TestCase):
         self.assertEqual(hasil.count(), 1)
         self.assertEqual(hasil.first().status, StatusTodo.SELESAI)
 
+    def test_hapus_todo_pertama_kali_diarsipkan(self):
+        hasil = self.service.hapus_todo(todo=self.todo)
+
+        self.todo.refresh_from_db()
+
+        self.assertTrue(hasil["diarsipkan"])
+        self.assertEqual(self.todo.status, StatusTodo.DIARSIPKAN)
+
+
+    def test_hapus_todo_kedua_kali_menghapus_dari_database(self):
+        self.todo.status = StatusTodo.DIARSIPKAN
+        self.todo.save()
+
+        hasil = self.service.hapus_todo(todo=self.todo)
+
+        self.assertTrue(hasil["dihapus"])
+        self.assertEqual(Todo.objects.count(), 0)
+
 
 class TodoAPITest(APITestCase):
 
@@ -128,3 +146,20 @@ class TodoAPITest(APITestCase):
 
         for item in response.data:
             self.assertEqual(item["status"], StatusTodo.TODO)
+
+    def test_api_delete_todo_arsip_dulu(self):
+        response = self.client.delete(f"/api/todo/{self.todo.id}/")
+
+        self.todo.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.todo.status, StatusTodo.DIARSIPKAN)
+
+    def test_api_delete_todo_setelah_diarsipkan_benar_benar_hilang(self):
+        self.todo.status = StatusTodo.DIARSIPKAN
+        self.todo.save()
+
+        response = self.client.delete(f"/api/todo/{self.todo.id}/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(Todo.objects.count(), 0)
