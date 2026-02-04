@@ -54,5 +54,18 @@ class TodoUbahStatusAPIView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        service = TodoService()
+
+        try:
+            todo = service.ubah_status(
+                todo=todo,
+                status_baru=serializer.validated_data["status"],
+            )
+        except DomainException as e:
+            return Response(
+                {"error": {"kode": e.kode, "pesan": e.pesan}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         response_serializer = TodoResponseSerializer(todo)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
