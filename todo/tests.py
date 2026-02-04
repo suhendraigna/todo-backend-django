@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.urls import reverse
+from rest_framework.test import APITestCase
 
 from todo.models import Todo, StatusTodo, PrioritasTodo
 from todo.services import TodoService
@@ -50,3 +52,53 @@ class TodoServiceTest(TestCase):
                 context.exception.kode,
                 ErrorTodo.TODO_SUDAH_DIARSIPKAN,
             )
+
+
+class TodoAPITest(APITestCase):
+
+    def setUp(self):
+        self.url_buat = "/api/todo/"
+
+        self.todo = Todo.objects.create(
+            judul="Test Todo",
+            prioritas=PrioritasTodo.SEDANG,
+        )
+
+    def test_api_buat_todo(self):
+        response = self.client.post(
+            self.url_buat,
+            data={
+                "judul": "Belajar API",
+                "prioritas": PrioritasTodo.SEDANG,
+            },
+            format="json",
+        )
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(Todo.objects.count(), 2)
+
+    def test_ubah_status_todo(self):
+        response = self.client.post(
+            f"/api/todo/{self.todo.id}/status/",
+            data={
+                "status": StatusTodo.SELESAI
+            },
+            format="json"
+        )
+
+        self.todo.refresh_from_db()
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.todo.status, StatusTodo.SELESAI)
+
+    def test_api_gagal_ubah_status_todo_langsung_diarsipkan(self):
+        response = self.client.post(
+            f"/api/todo/{self.todo.id}/status/",
+            data={
+                "status": StatusTodo.DIARSIPKAN
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.data["error"]["kode"], ErrorTodo.STATUS_TIDAK_VALID)
