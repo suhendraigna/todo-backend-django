@@ -50,3 +50,11 @@ class TodoService:
         }
         return status_baru in transisi_valid.get(status_lama, [])
 
+    
+    def ambil_semua(self, *, status=None):
+        queryset = Todo.objects.all().order_by("-dibuat_pada")
+
+        if status:
+            queryset = queryset.filter(status=status)
+
+        return queryset

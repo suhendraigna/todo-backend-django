@@ -53,6 +53,18 @@ class TodoServiceTest(TestCase):
                 ErrorTodo.TODO_SUDAH_DIARSIPKAN,
             )
 
+    def test_ambil_semua_todo_dengan_filter_status(self):
+        Todo.objects.create(
+            judul="Todo selesai",
+            prioritas=PrioritasTodo.SEDANG,
+            status=StatusTodo.SELESAI,
+        )
+
+        hasil = self.service.ambil_semua(status=StatusTodo.SELESAI)
+
+        self.assertEqual(hasil.count(), 1)
+        self.assertEqual(hasil.first().status, StatusTodo.SELESAI)
+
 
 class TodoAPITest(APITestCase):
 
@@ -102,3 +114,17 @@ class TodoAPITest(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertEqual(response.data["error"]["kode"], ErrorTodo.STATUS_TIDAK_VALID)
+
+    def test_api_list_todo(self):
+        response = self.client.get("/api/todo/")
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)
+
+    def test_api_filter_todo_by_status(self):
+        response = self.client.get("/api/todo/?status=TODO")
+
+        self.assertEqual(response.status_code, 200)
+
+        for item in response.data:
+            self.assertEqual(item["status"], StatusTodo.TODO)

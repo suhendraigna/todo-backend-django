@@ -38,7 +38,17 @@ class TodoBuatAPIView(APIView):
         )
         
         response_serializer = TodoResponseSerializer(todo)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return Response(response_serializer.data, status=status.HTTP_201_CREATED
+                )
+
+    def get(self, request):
+        status_filter = request.query_params.get("status")
+        
+        service = TodoService()
+        todos = service.ambil_semua(status=status_filter)
+
+        serializer = TodoResponseSerializer(todos, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class TodoUbahStatusAPIView(APIView):
