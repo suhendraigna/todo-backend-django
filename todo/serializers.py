@@ -34,3 +34,11 @@ class TodoResponseSerializer(serializers.ModelSerializer):
             "diubah_pada",
             "labels",
         ]
+
+
+class TodoUbahSerializer(serializers.Serializer):
+    judul = serializers.CharField(max_length=200)
+    deskripsi = serializers.CharField(required=False, allow_blank=True)
+    prioritas = serializers.ChoiceField(choices=PrioritasTodo.choices)
+
+

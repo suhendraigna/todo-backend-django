@@ -67,3 +67,24 @@ class TodoService:
 
         todo.delete()
         return {"dihapus": True}
+
+    def ubah_todo(
+        self,
+        *,
+        todo: Todo,
+        judul,
+        deskripsi="",
+        prioritas
+    ):
+        if todo.status == StatusTodo.DIARSIPKAN:
+            raise DomainException(
+                ErrorTodo.TODO_SUDAH_DIARSIPKAN,
+                "Todo yang sudah diarsipkan tidak dapat diubah.",
+            )
+
+        todo.judul = judul
+        todo.deskripsi = deskripsi
+        todo.prioritas = prioritas
+
+        todo.save(update_fields=["judul", "deskripsi", "prioritas", "diubah_pada"])
+        return todo

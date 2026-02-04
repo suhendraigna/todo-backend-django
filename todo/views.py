@@ -8,6 +8,7 @@ from todo.serializers import(
     TodoBuatSerializer,
     TodoUbahStatusSerializer,
     TodoResponseSerializer,
+    TodoUbahSerializer,
 )
 from label.models import Label
 from common.exceptions import DomainException
@@ -81,13 +82,43 @@ class TodoUbahStatusAPIView(APIView):
         return Response(response_serializer.data, status=status.HTTP_200_OK)
 
 
-class TodoHapusAPIView(APIView):
-    def delete(self, request, todo_id):
+class TodoDetailAPIView(APIView):
+
+    def put(self, request, todo_id):
+        serializer = TodoUbahSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
         try:
             todo = Todo.objects.get(id=todo_id)
         except Todo.DoesNotExist:
             return Response(
-                {"error": {"pesan": "Todo tidak ditemukan"}},
+                {"error":{"pesan": "Todo tidak ditemukan."}},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+
+        service = TodoService()
+        try:
+            todo = service.ubah_todo(
+                todo=todo,
+                judul=serializer.validated_data["judul"],
+                deskripsi=serializer.validated_data.get("deskripsi", ""),
+                prioritas=serializer.validated_data["prioritas"],
+            )
+        except DomainException as e:
+            return Response(
+                {"error": {"kode": e.kode, "pesan": e.pesan}},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        response_serializer = TodoResponseSerializer(todo)
+        return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request, todo_id):
+        try:
+            todo = Todo.objects.get(id=todo_id)
+        except Todo.DoestNotExist:
+            return Response(
+                {"error": {"pesan": "Todo tidak ditemukan."}},
                 status=status.HTTP_404_NOT_FOUND,
                 )
 
