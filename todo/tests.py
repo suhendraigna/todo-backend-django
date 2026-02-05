@@ -219,3 +219,36 @@ class TodoAPITest(APITestCase):
 
         self.assertEqual(response.status_code, 400)
         self.assertIn("error", response.data)
+
+    def test_api_ubah_todo_berhasil(self):
+        response = self.client.put(
+            f"/api/todo/{self.todo.id}/",
+            data={
+                "judul": "Judul API",
+                "deskripsi": "Deskripsi API",
+                "prioritas": PrioritasTodo.TINGGI,
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data["judul"], "Judul API")
+        self.assertEqual(response.data["deskripsi"], "Deskripsi API")
+        self.assertEqual(response.data["prioritas"], PrioritasTodo.TINGGI)
+
+    def test_api_gagal_ubah_todo_jika_sudah_diarsipkan(self):
+        self.todo.status = StatusTodo.DIARSIPKAN
+        self.todo.save()
+
+        response = self.client.put(
+            f"/api/todo/{self.todo.id}/",
+            data={
+                "judul": "X",
+                "deskripsi": "Y",
+                "prioritas": PrioritasTodo.TINGGI,
+            },
+            format="json"
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("error", response.data)
