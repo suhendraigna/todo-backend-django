@@ -1,6 +1,7 @@
 from todo.models import Todo, StatusTodo
 from todo.error_codes import ErrorTodo
 from common.exceptions import DomainException
+from label.models import Label
 
 
 
@@ -87,4 +88,15 @@ class TodoService:
         todo.prioritas = prioritas
 
         todo.save(update_fields=["judul", "deskripsi", "prioritas", "diubah_pada"])
+        return todo
+
+    def tambah_label(self, *, todo: Todo, label_id):
+        try:
+            label = Label.objects.get(id=label_id)
+        except Label.DoesNotExist:
+            raise DomainException("LABEL_TIDAK_DITEMUKAN", "Label tidak ditemukan.")
+        if todo.labels.filter(id=label_id).exists():
+            raise DomainException("LABEL_SUDAH_ADA", "Label sudah terpasang di todo ini.")
+
+        todo.labels.add(label)
         return todo

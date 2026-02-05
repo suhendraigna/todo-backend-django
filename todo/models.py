@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+from label.models import Label
 
 
 
@@ -41,6 +42,9 @@ class Todo(models.Model):
         null=True,
         blank=True
     )
+
+    label = models.ManyToManyField(Label, blank=True)
+
     dibuat_pada=models.DateTimeField(
         auto_now_add=True
     )

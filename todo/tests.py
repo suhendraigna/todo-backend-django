@@ -6,7 +6,7 @@ from todo.models import Todo, StatusTodo, PrioritasTodo
 from todo.services import TodoService
 from todo.error_codes import ErrorTodo
 from common.exceptions import DomainException
-
+from label.services import Label
 
 class TodoServiceTest(TestCase):
 
@@ -106,6 +106,19 @@ class TodoServiceTest(TestCase):
                 prioritas=PrioritasTodo.RENDAH,
             )
 
+    def test_tambah_label_ke_todo_berhasil(self):
+        label = Label.objects.create(nama="urgent")
+
+        hasil = self.service.tambah_label(todo=self.todo, label_id=label.id)
+
+        self.assertEqual(hasil.labels.count(), 1)
+
+    def test_gagal_tambah_label_jika_sudah_ada(self):
+        label = Label.objects.create(nama="urgent")
+        self.todo.labels.add(label)
+
+        with self.assertRaises(DomainException):
+            self.service.tambah_label(todo=self.todo, label_id=label.id)
 
 class TodoAPITest(APITestCase):
 

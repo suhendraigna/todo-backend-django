@@ -42,3 +42,5 @@ class TodoUbahSerializer(serializers.Serializer):
     prioritas = serializers.ChoiceField(choices=PrioritasTodo.choices)
 
 
+class TodoTambahLabelSerializer(serializers.Serializer):
+    label_id = serializers.UUIDField()
